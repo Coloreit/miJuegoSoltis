@@ -1,15 +1,34 @@
 import { Button, Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import Card from '../components/Card'
 import Colors from '../contants/Colors'
 import Input from '../components/Input'
+import NumberContainer from '../components/NumberContainer'
+import { titleStyle } from '../contants/TextStyles'
 
-const StartGameScreen = () => {
+const StartGameScreen = ({ onStartGame }) => {
 
-    const [enteredValue, setEnteredValue] = React.useState('')
+    const [enteredValue, setEnteredValue] = useState('')
+    const [confirmed, setConfirmed] = useState(false)
+    const [selectedNumber, setSelectedNumber] = useState()
 
     const numberInputHandler = inputText => {
         setEnteredValue(inputText.replace(/[^0-9]/g, ''))
+    }
+
+    const resetInputHandler = () => {
+        setEnteredValue('');
+        setConfirmed(false);
+    }
+
+    const confirmInputHandler = () => {
+        const chosenNumber = parseInt(enteredValue)
+        if (chosenNumber === NaN || chosenNumber <= 0 || chosenNumber > 99) {
+        return
+        }
+        setConfirmed(true)
+        setSelectedNumber(chosenNumber)
+        setEnteredValue('')
     }
 
     return (
@@ -26,16 +45,27 @@ const StartGameScreen = () => {
                         autoCorrect={false}
                         keyboardType='number-pad'
                         maxLength={2}
+                        value={enteredValue}
+                        onChangeText={numberInputHandler}
                     />
                     <View style={styles.buttonsContainer}>
                         <View style={styles.button}>
-                            <Button title='Limpiar' onPress={() => { }} color={Colors.accent}/>
+                            <Button title='Limpiar' onPress={resetInputHandler} color={Colors.accent}/>
                         </View>
                         <View style={styles.button}>
-                            <Button title='Confirmar' onPress={() => { }} rcolor={Colors.primary}/>
+                            <Button title='Confirmar' onPress={confirmInputHandler} rcolor={Colors.primary}/>
                         </View>
                     </View>
                 </Card>
+                {confirmed &&
+                    <Card style={styles.selectedNumberContainer}>
+                        <Text>Tu seleccion</Text>
+                        <NumberContainer>{selectedNumber}</NumberContainer>
+                        <Button title='EMPEZAR JUEGO' onPress={()=>{
+                            onStartGame(selectedNumber)
+                        }}/>
+                    </Card>
+                }
             </View>
         </TouchableWithoutFeedback>
     )
@@ -50,8 +80,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     title: {
-        fontSize: 20,
-        marginVertical: 10,
+        ...titleStyle
     },
     inputContainer: {
         width: 300,
@@ -74,5 +103,12 @@ const styles = StyleSheet.create({
     },
     button:{
         width: 100,
+    },
+    selectedNumberContainer:{
+        marginTop: 20,
+        width: 200, 
+        maxWidth: '80%',
+        padding: 10,
+        alignItems: 'center'
     }
 })
